@@ -176,6 +176,7 @@ describe("Mongoose Adapter private helper functions", () => {
       }
     });
 
+    // TypeScript child startup must fit inside its existing ten-second deadline.
     it("preserves a custom numeric caster registered before the adapter loads", () => {
       const script = `
         const assert = require('assert');
@@ -195,7 +196,7 @@ describe("Mongoose Adapter private helper functions", () => {
         cwd: process.cwd(), timeout: 10000,
         env: { PATH: process.env.PATH, TS_NODE_PROJECT: "tsconfig.json" }
       });
-    });
+    }).timeout(15000);
 
     it("fails closed for an unqualified Mongoose version", () => {
       const script = `
@@ -215,7 +216,7 @@ describe("Mongoose Adapter private helper functions", () => {
         cwd: process.cwd(), timeout: 10000,
         env: { PATH: process.env.PATH, TS_NODE_PROJECT: "tsconfig.json" }
       });
-    });
+    }).timeout(15000);
 
     it("should support multiple errors at once", () => {
       return testModelErrors({
