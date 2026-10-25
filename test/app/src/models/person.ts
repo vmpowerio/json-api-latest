@@ -17,7 +17,7 @@ schema.virtual('virtualName').get(function(this: PersonDoc) {
   return this.name + ' (virtualized)'; // tslint:disable-line:no-invalid-this
 }).set(function(this: PersonDoc, v: string) {
   // tslint:disable-next-line:no-invalid-this
-  this.name = v.substr(0, v.lastIndexOf(' (virtualized)'));
+  this.name = v.slice(0, Math.max(0, v.lastIndexOf(' (virtualized)')));
 });
 
 export default mongoose.model("Person", schema);

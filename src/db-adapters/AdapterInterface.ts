@@ -53,7 +53,7 @@ export interface AdapterInstance<T extends new (...args: any[]) => any> {
 };
 
 export interface AdapterClass {
-  new (...args: any[]): AdapterInstance<{ new (...args: any[]): any }>;
+  new (...args: any[]): AdapterInstance<new (...args: any[]) => any>;
   getStandardizedSchema(model: any, pluralizer: any): any;
   // Must include the "and" and "eq" operators
   supportedOperators: SupportedOperators

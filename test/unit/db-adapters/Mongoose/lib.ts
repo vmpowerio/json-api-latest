@@ -4,6 +4,8 @@ import { toMongoCriteria, errorHandler } from "../../../../src/db-adapters/Mongo
 import APIError from '../../../../src/types/APIError';
 import { Identifier, FieldExpression } from '../../../../src/steps/pre-query/parse-query-params';
 import * as Errors from '../../../../src/util/errors';
+import { AssertionError } from "assert";
+import { execFileSync } from "child_process";
 
 describe("Mongoose Adapter private helper functions", () => {
   describe("errorHandler", () => {
@@ -107,6 +109,111 @@ describe("Mongoose Adapter private helper functions", () => {
             meta: { source: { field: "customSetter" } }
           })
         );
+      });
+    });
+
+    it("redacts custom numeric setters even when they forge built-in error names and stacks", () => {
+      const privateError = new Error("private custom setter detail");
+      privateError.name = "AssertionError";
+      privateError.stack = "AssertionError: forged mongoose/lib/cast/number.js";
+      const schema = new mongoose.Schema({ value: { type: Number, set() { throw privateError; } } });
+      const Model = mongoose.model("ForgedNumericSetter", schema);
+      const failure = new Model({ value: "invalid" }).validateSync();
+      let mapped: any;
+      try { errorHandler(failure); } catch(errors) { mapped = errors; }
+      expect(mapped[0].detail).to.equal('Invalid value for path "value"');
+      expect(mapped[0].rawError).to.equal(privateError);
+      expect(JSON.stringify(mapped[0])).not.to.contain("private custom setter detail");
+    });
+
+    it("preserves successful built-in numeric coercions", () => {
+      const Model = mongoose.model("ValidNumericCoercion", new mongoose.Schema({ value: Number }));
+      for(const [input, expected] of [["12.5", 12.5], [false, 0], [true, 1], ["", null], [null, null]]) {
+        const document = new Model({ value: input });
+        expect(document.validateSync()).to.equal(undefined);
+        expect(document.value).to.equal(expected);
+      }
+    });
+
+    it("redacts real AssertionErrors thrown by custom numeric setters", () => {
+      const privateError = new AssertionError({ message: "private assertion detail" });
+      const schema = new mongoose.Schema({ value: { type: Number, set() { throw privateError; } } });
+      const Model = mongoose.model("CustomAssertionSetter", schema);
+      const failure = new Model({ value: "invalid" }).validateSync();
+      let mapped: any;
+      try { errorHandler(failure); } catch(errors) { mapped = errors; }
+      expect(mapped[0].detail).to.equal('Invalid value for path "value"');
+      expect(mapped[0].rawError).to.equal(privateError);
+      expect(JSON.stringify(mapped[0])).not.to.contain("private assertion detail");
+    });
+
+    it("does not trust AssertionErrors from user-controlled coercion inside the built-in caster", () => {
+      const privateError = new AssertionError({ message: "private coercion detail" });
+      const Model = mongoose.model("CustomNumericCoercion", new mongoose.Schema({ value: Number }));
+      const failure = new Model({ value: { valueOf() { throw privateError; } } as any }).validateSync();
+      let mapped: any;
+      try { errorHandler(failure); } catch(errors) { mapped = errors; }
+      expect(mapped[0].detail).to.equal('Invalid value for path "value"');
+      expect(mapped[0].rawError).to.equal(privateError);
+      expect(JSON.stringify(mapped[0])).not.to.contain("private coercion detail");
+    });
+
+    it("does not replace a subsequently registered custom numeric caster", () => {
+      const prior = mongoose.Schema.Types.Number.cast();
+      const privateError = new AssertionError({ message: "private custom caster detail" });
+      const custom = () => { throw privateError; };
+      mongoose.Schema.Types.Number.cast(custom);
+      try {
+        const Model = mongoose.model("CustomNumericCaster", new mongoose.Schema({ value: Number }));
+        const failure = new Model({ value: "invalid" }).validateSync();
+        let mapped: any;
+        try { errorHandler(failure); } catch(errors) { mapped = errors; }
+        expect(mapped[0].detail).to.equal('Invalid value for path "value"');
+        expect(mapped[0].rawError).to.equal(privateError);
+        expect(mongoose.Schema.Types.Number.cast()).to.equal(custom);
+      } finally {
+        mongoose.Schema.Types.Number.cast(prior);
+      }
+    });
+
+    it("preserves a custom numeric caster registered before the adapter loads", () => {
+      const script = `
+        const assert = require('assert');
+        const mongoose = require('mongoose');
+        const custom = () => { throw new assert.AssertionError({ message: 'private before-import detail' }); };
+        mongoose.Schema.Types.Number.cast(custom);
+        const { errorHandler } = require('./src/db-adapters/Mongoose/lib');
+        assert.strictEqual(mongoose.Schema.Types.Number.cast(), custom);
+        const Model = mongoose.model('BeforeImportCaster', new mongoose.Schema({ value: Number }));
+        const error = new Model({ value: 'invalid' }).validateSync();
+        let result;
+        try { errorHandler(error); } catch (errors) { result = errors[0]; }
+        assert.strictEqual(result.detail, 'Invalid value for path "value"');
+        assert(!JSON.stringify(result).includes('private before-import detail'));
+      `;
+      execFileSync(process.execPath, ["--require", "ts-node/register", "-e", script], {
+        cwd: process.cwd(), timeout: 10000,
+        env: { PATH: process.env.PATH, TS_NODE_PROJECT: "tsconfig.json" }
+      });
+    });
+
+    it("fails closed for an unqualified Mongoose version", () => {
+      const script = `
+        const assert = require('assert');
+        const mongoose = require('mongoose');
+        const original = mongoose.Schema.Types.Number.cast();
+        mongoose.version = '0.0.0-unqualified';
+        const { errorHandler } = require('./src/db-adapters/Mongoose/lib');
+        assert.strictEqual(mongoose.Schema.Types.Number.cast(), original);
+        const Model = mongoose.model('UnqualifiedCaster', new mongoose.Schema({ value: Number }));
+        const error = new Model({ value: 'invalid' }).validateSync();
+        let result;
+        try { errorHandler(error); } catch (errors) { result = errors[0]; }
+        assert.strictEqual(result.detail, 'Invalid value for path "value"');
+      `;
+      execFileSync(process.execPath, ["--require", "ts-node/register", "-e", script], {
+        cwd: process.cwd(), timeout: 10000,
+        env: { PATH: process.env.PATH, TS_NODE_PROJECT: "tsconfig.json" }
       });
     });
 

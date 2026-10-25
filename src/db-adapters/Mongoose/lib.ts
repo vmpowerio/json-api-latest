@@ -5,6 +5,7 @@ import APIError from "../../types/APIError";
 import Resource from "../../types/Resource";
 import * as Errors from "../../util/errors";
 import { FieldExpression, Identifier } from "../../types/index";
+import { isBuiltInNumericCastFailure } from "./numeric-cast-provenance";
 
 // tslint:disable-next-line no-var-requires no-submodule-imports
 const MongooseError = require("mongoose/lib/error");
@@ -47,7 +48,8 @@ export function errorHandler(err, context?: { type: string, id?: string }): neve
           // in a custom setter or validation function (which we try to identify
           // by checking if the error is not a MongooseError), but that isn't
           // displaySafe, use a generic message but at least set rawError properly.
-          else if(thisError.reason && !(thisError.reason instanceof MongooseError)) {
+          else if(thisError.reason && !(thisError.reason instanceof MongooseError)
+            && !isBuiltInNumericCastFailure(thisError)) {
             return Errors.invalidFieldValue({
               detail: `Invalid value for path "${thisError.path}"`,
               rawError: thisError.reason,
@@ -56,7 +58,9 @@ export function errorHandler(err, context?: { type: string, id?: string }): neve
           }
 
           return Errors.invalidFieldValue({
-            detail: thisError.message,
+            detail: isBuiltInNumericCastFailure(thisError)
+              ? `Cast to Number failed for value ${thisError.stringValue} at path "${thisError.path}"`
+              : thisError.message,
             rawError: thisError,
             meta: { ...metaSource }
           });
