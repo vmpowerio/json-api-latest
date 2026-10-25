@@ -159,7 +159,7 @@ export default class APIController {
           request.queryParams,
           { method: request.method, uri: request.uri }
         );
-      } catch (e) {
+      } catch (e: any) {
         throw Errors.invalidQueryParamValue({
           detail: `Invalid ${paramName} syntax: ${e.message} See jsonapi.js.org for details.`,
           source: { parameter: paramName }
@@ -435,7 +435,7 @@ export default class APIController {
       }
 
       return result;
-    } catch(err) {
+    } catch(err: any) {
       return makeResultFromErrors(opts.makeDocument, err);
     }
   }
@@ -538,7 +538,7 @@ export default class APIController {
     }
 
     // If an error occurred, (e.g., parsing the request) convert it to a Result.
-    catch (err) {
+    catch (err: any) {
       logger.warn("API Controller caught error", err, err.stack);
       jsonAPIResult = makeResultFromErrors(this.makeDoc, err);
     }
@@ -592,7 +592,7 @@ export default class APIController {
       return resultToHTTPResponse(result, contentType);
     }
 
-    catch (e) {
+    catch (e: any) {
       // If we allow406, replace result with the 406 error message.
       const finalResult = allow406
         ? makeResultFromErrors((data: DocumentData) => new Document(data), e)

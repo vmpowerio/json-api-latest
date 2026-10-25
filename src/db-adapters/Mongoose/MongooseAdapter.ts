@@ -49,10 +49,15 @@ const isPoint = R.allPass([
   R.all(it => Number(it) === it)
 ]);
 
-export default class MongooseAdapter implements Adapter<typeof MongooseAdapter> {
+interface MongooseAdapter {
   // Workaround for https://github.com/Microsoft/TypeScript/issues/3841.
   // Doing this makes our implements declaration work.
   "constructor": typeof MongooseAdapter;
+}
+
+export { MongooseAdapter as default };
+
+class MongooseAdapter implements Adapter<typeof MongooseAdapter> {
 
   // Some precomputed name mappings that we use throughout.
   // Note: a type name here can be a subtype (in the sense of Query.type,
@@ -66,7 +71,7 @@ export default class MongooseAdapter implements Adapter<typeof MongooseAdapter> 
   constructor(
     protected models: { [modelName: string]: Model<any> } = (mongoose as any).models,
     protected toTypeName: (modelName: string) => string = getTypeName,
-    protected idGenerator?: ((doc: Document) => mongodb.ObjectID)
+    protected idGenerator?: ((doc: Document) => mongodb.ObjectId)
   ) {
     this.typeNamesToModelNames = {};
     this.modelNamesToTypeNames = {};
@@ -349,7 +354,7 @@ export default class MongooseAdapter implements Adapter<typeof MongooseAdapter> 
     const parentModel = this.getModel(parentType);
 
     const prefetchedDocs = patch.map(it => it.adapterExtra).values.filter(it => !!it);
-    const getOIdAsString = R.pipe<Record<"_id", mongodb.ObjectID>, mongodb.ObjectID, string>(R.prop('_id'), String);
+    const getOIdAsString = R.pipe<Record<"_id", mongodb.ObjectId>, mongodb.ObjectId, string>(R.prop('_id'), String);
 
     const docIdsToFetch = [...setDifference(
       patch.map(R.prop('id')).values,

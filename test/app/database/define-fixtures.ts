@@ -4,14 +4,14 @@ import database from "./index";
 
 /*eslint-disable new-cap */
 const ObjectId = mongoose.Types.ObjectId;
-const govtId = ObjectId("54419d550a5069a2129ef254");
-const smithId = ObjectId("53f54dd98d1e62ff12539db2");
-const doeId = ObjectId("53f54dd98d1e62ff12539db3");
-const echoOrgId = ObjectId("59ac9c0ecc4c356fcda65202");
-const genderPersonId = ObjectId("59af14d3bbd18cd55ea08ea1");
-const invisibleResourceId = ObjectId("59af14d3bbd18cd55ea08ea2");
-const elementaryId = ObjectId("59af14d3bbd18cd55ea08ea3");
-const justForSubtypePatchId = ObjectId("5a5934cfc810949cebeecc33");
+const govtId = new ObjectId("54419d550a5069a2129ef254");
+const smithId = new ObjectId("53f54dd98d1e62ff12539db2");
+const doeId = new ObjectId("53f54dd98d1e62ff12539db3");
+const echoOrgId = new ObjectId("59ac9c0ecc4c356fcda65202");
+const genderPersonId = new ObjectId("59af14d3bbd18cd55ea08ea1");
+const invisibleResourceId = new ObjectId("59af14d3bbd18cd55ea08ea2");
+const elementaryId = new ObjectId("59af14d3bbd18cd55ea08ea3");
+const justForSubtypePatchId = new ObjectId("5a5934cfc810949cebeecc33");
 /*eslint-enable new-cap */
 
 fixtures.save("all", {

@@ -54,7 +54,8 @@ function runQuery<T extends RunnableQuery>(registry: ResourceTypeRegistry, query
     throw new Error("Unexpected query type.");
   }
 
-  return method.call(adapter, finalQuery);
+  // The instanceof dispatch above binds this method to the matching query kind.
+  return (method as (query: Query) => Promise<QueryReturning<T>>).call(adapter, finalQuery);
 }
 
 /**

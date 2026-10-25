@@ -101,7 +101,7 @@ AgentPromise.then((Agent) => {
     });
 
     it("should not set a content-type header on 204 responses", (done) => {
-      return Agent.request("POST", "/organizations")
+      Agent.request("POST", "/organizations")
         .type("application/vnd.api+json")
         .send({"data": VALID_ORG_RESOURCE_NO_ID })
         .then((response) => {

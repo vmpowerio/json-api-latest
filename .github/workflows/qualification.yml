@@ -1,0 +1,80 @@
+name: Library qualification
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: library-qualification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node24:
+    name: Node 24 full qualification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      mongodb:
+        # Official Mongo 7.0.45 Jammy, compatible with Mongoose 6.13.11.
+        image: mongo:7.0.45-jammy@sha256:7fba8c37d681a79f22a85d2b06bd5ed121a7973c0a6ca20ed4887bb0a1548ce0
+        ports:
+          - 127.0.0.1:27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'quit(db.adminCommand({ping:1}).ok ? 0 : 1)'"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.1
+          package-manager-cache: false
+      - name: Check public install guards
+        run: node --test .github/scripts/install-public.test.cjs
+      - name: Install the frozen public dependency graph
+        run: node .github/scripts/install-public.cjs
+      - name: Build, lint, tooling and both unit forms
+        run: bash .github/scripts/qualify.sh full
+      - name: Complete isolated database integration suite
+        env:
+          HOST: 127.0.0.1
+          PORT: '3000'
+          NODE_OPTIONS: --dns-result-order=ipv4first
+        run: |
+          timeout --kill-after=5s 60s npm run test:install-fixtures
+          # Existing fixtures open an HTTP listener and Mongoose connection.
+          # Mocha --exit closes only this test process after the full selection.
+          timeout --kill-after=5s 300s npm run test:fixtures-installed -- --exit
+      - name: Verify test listener stopped
+        if: always()
+        run: |
+          node -e 'const s=require("node:net").connect(3000,"127.0.0.1"); s.on("connect",()=>{s.destroy();process.exitCode=1;console.error("Test listener remained open");}); s.on("error",e=>{if(e.code!=="ECONNREFUSED")process.exitCode=1;}); s.setTimeout(1000,()=>{s.destroy();process.exitCode=1;});'
+      # GitHub destroys this job's disposable service container on every exit.
+
+  node18:
+    name: Node 18 compatibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Use the qualified npm age guard to install; switch before runtime tests.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.1
+          package-manager-cache: false
+      - name: Install the frozen public dependency graph
+        run: node .github/scripts/install-public.cjs
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 18.20.8
+          package-manager-cache: false
+      - name: Build, lint and runtime compatibility
+        run: bash .github/scripts/qualify.sh compatibility

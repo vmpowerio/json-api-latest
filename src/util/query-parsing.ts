@@ -27,7 +27,7 @@ function parseSingleQueryParamString(paramString: string) {
   const [parsedKey, rawValue] = firstEqualPos === -1
     ? [decodeURIComponent(paramString.replace("+"," ")), ""]
     : [decodeURIComponent(paramString.slice(0, firstEqualPos).replace("+"," ")),
-      paramString.substr(firstEqualPos+1)];
+      paramString.slice(firstEqualPos+1)];
   return [parsedKey, rawValue]
 }
 

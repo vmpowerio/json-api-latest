@@ -256,7 +256,7 @@ function makeSignInQuery(opts: QueryBuildingContext) {
   }
 
   authHeader = Array.isArray(authHeader) ? <string>authHeader[0] : authHeader;
-  const [user, pass] = Buffer.from(authHeader.substr(6), 'base64').toString().split(':');
+  const [user, pass] = Buffer.from(authHeader.slice(6), 'base64').toString().split(':');
 
   return new FindQuery({
     type: "people",

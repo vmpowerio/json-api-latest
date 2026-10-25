@@ -16,8 +16,7 @@ const models = {
  * Export a promise for an object that can get the models and has the db connected.
  */
 export default mongoose.connect(
-  "mongodb://localhost/integration-test",
-  { useMongoClient: true }
+  "mongodb://localhost/integration-test"
 ).then(() => {
   return {
     models() {

@@ -96,7 +96,7 @@ export default class ExpressStrategy extends Base {
     });
 
     if(response.body !== undefined) {
-      res.send(new Buffer(response.body)).end();
+      res.send(Buffer.from(response.body)).end();
     }
 
     else {

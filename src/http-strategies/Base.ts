@@ -89,10 +89,9 @@ export default class BaseStrategy {
     const reqUrl = req.url as string;
     const queryStartIndex = reqUrl.indexOf("?");
     const hasQuery = queryStartIndex !== -1;
-    const rawQueryString = hasQuery && reqUrl.substr(queryStartIndex + 1);
+    const rawQueryString = hasQuery && reqUrl.slice(queryStartIndex + 1);
 
-    // TODO: investigate use of req.connection.encrypted. Is there a better way?
-    const protocolGuess = protocol || ((req.connection as any).encrypted ? "https" : "http");
+    const protocolGuess = protocol || ((req.socket as any).encrypted ? "https" : "http");
     const host = this.config.host || fallbackHost;
     const body = await this.getParsedBodyJSON(req); // could throw, rejecting promise.
 

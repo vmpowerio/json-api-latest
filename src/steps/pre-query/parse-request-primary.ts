@@ -36,7 +36,7 @@ function toResource(json) {
   try {
     // resource data validated by resource constructor. May throw.
     return new Resource(type, id, attributes, relationships, meta);
-  } catch(e) {
+  } catch(e: any) {
     switch (e.code) {
       case 1:
         throw Errors.resourceMissingTypeKey();

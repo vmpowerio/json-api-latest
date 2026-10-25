@@ -97,7 +97,7 @@ export default class KoaStrategy extends Base {
     });
 
     if(responseObject.body !== undefined) {
-      ctx.body = new Buffer(responseObject.body);
+      ctx.body = Buffer.from(responseObject.body);
     }
   }
 

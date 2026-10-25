@@ -18,13 +18,7 @@ export default appPromise.then(function({ app }: { app: Application}) {
   const baseUrl = "http://" + host + ":" + port;
 
   const appListenPromise = new Promise<void>((resolve, reject) => {
-    app.listen(Number(port), host, function(err) {
-      if(err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
+    app.listen(Number(port), host, resolve).once("error", reject);
   });
 
   return appListenPromise.then(() => {
