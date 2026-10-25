@@ -10,7 +10,7 @@ class QueryStrategy extends BaseStrategy {
     return undefined;
   }
 
-  parse(query: string) {
+  public parse(query: string) {
     return this.buildRequestObject({
       url: "/items?" + query,
       method: "GET",

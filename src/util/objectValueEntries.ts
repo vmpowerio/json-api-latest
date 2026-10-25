@@ -1,6 +1,6 @@
-const reduce = Function.bind.call(Function.call, Array.prototype.reduce); // tslint:disable-line:no-unbound-method
-const isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable); // tslint:disable-line:no-unbound-method
-const concat = Function.bind.call(Function.call, Array.prototype.concat); // tslint:disable-line:no-unbound-method
+const reduce = (Function.bind as Function).call(Function.call, Array.prototype.reduce); // tslint:disable-line:no-unbound-method
+const isEnumerable = (Function.bind as Function).call(Function.call, Object.prototype.propertyIsEnumerable); // tslint:disable-line:no-unbound-method
+const concat = (Function.bind as Function).call(Function.call, Array.prototype.concat); // tslint:disable-line:no-unbound-method
 const keys = Reflect.ownKeys;
 
 /**

@@ -161,7 +161,7 @@ describe("Subtypes", () => {
         { ...VALID_SCHOOL_RESOURCE_NO_ID, type: "schools", meta: undefined } // type=subtype, w/o meta.types
       ];
 
-      const requests = [].concat.apply([], endpoints.map(endpoint =>
+      const requests = ([] as any[]).concat.apply([], endpoints.map(endpoint =>
         bodies.map(body => {
           return Agent.request("POST", endpoint)
             .type('application/vnd.api+json')
@@ -285,7 +285,7 @@ describe("Subtypes", () => {
         { ...NEVER_APPLIED_SCHOOL_PATCH, type: "schools" } // a school, but still wrong type key.
       ];
 
-      const requests = [].concat.apply([], endpoints.map(endpoint =>
+      const requests = ([] as any[]).concat.apply([], endpoints.map(endpoint =>
         bodies.map(body => {
           return Agent.request("PATCH", endpoint)
             .type('application/vnd.api+json')

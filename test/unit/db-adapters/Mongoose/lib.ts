@@ -34,7 +34,7 @@ describe("Mongoose Adapter private helper functions", () => {
       }, (e) => {
         try {
           errorHandler(e);
-        } catch(result) {
+        } catch(result: any) {
           return testFn(result, e);
         }
       });

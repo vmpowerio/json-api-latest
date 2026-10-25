@@ -100,7 +100,7 @@ export default class Document {
         return this.primary.toJSON();
       }
 
-      return {};
+      return { data: undefined };
     })();
 
     if(this.meta) {

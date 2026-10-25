@@ -52,7 +52,9 @@ export class Just<T> {
 }
 
 const NOTHING = new Nothing<any>();
-export default function Maybe<T>(x: T | undefined): Maybe<T> {
+function Maybe<T>(x: T | undefined): Maybe<T> {
   // Sometimes, null is a valid value, so we only make undefined into Nothing.
   return x !== undefined ? new Just(x) : (NOTHING as Nothing<T>);
 }
+
+export default Maybe;
