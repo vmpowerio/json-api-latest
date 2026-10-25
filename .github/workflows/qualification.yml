@@ -41,6 +41,10 @@ jobs:
         run: node .github/scripts/install-public.cjs
       - name: Build, lint, tooling and both unit forms
         run: bash .github/scripts/qualify.sh full
+      - name: Verify isolated packed consumer offline
+        env:
+          JSON_API_PUBLIC_CACHE: ${{ runner.temp }}/json-api-public-cache
+        run: timeout --kill-after=5s 180s npm run test:package
       - name: Complete isolated database integration suite
         env:
           HOST: 127.0.0.1
@@ -78,3 +82,7 @@ jobs:
           package-manager-cache: false
       - name: Build, lint and runtime compatibility
         run: bash .github/scripts/qualify.sh compatibility
+      - name: Verify isolated packed consumer offline
+        env:
+          JSON_API_PUBLIC_CACHE: ${{ runner.temp }}/json-api-public-cache
+        run: timeout --kill-after=5s 180s npm run test:package

@@ -1,0 +1,19 @@
+{
+  "origin": "ethanresnick/negotiator",
+  "upstreamBase": "e2fe4abc56271b9851132f3e508e7323415c8aea",
+  "localBackport": "90952f6bb84ef3fe7130c996f9ab9e7a984acd31",
+  "officialFix": "26a05ec15cf7d1fa56000d66ebe9c9a1a62cb75c",
+  "advisory": "GHSA-7mc5-chhp-fmc3",
+  "license": "MIT",
+  "runtimeChange": "Exact upstream language regex only; custom media type behavior and other runtime files unchanged",
+  "files": {
+    "index.js": "6a68089b85dce3342035d2c527e29320189f7df829f948fdc2a135a551fb6f2e",
+    "lib/charset.js": "42cdc1df0569a5af23f1b0736d52f138d02c2ea19317015b29296ca7b414cd49",
+    "lib/encoding.js": "0a0d0ab0d66928875b8595e24da314cddb6caa467203da0992ece379745f4227",
+    "lib/language.js": "d65b52869b713894013f58104f6aa60d2dc98cb5b0336d3e84fa373381cea9ec",
+    "lib/mediaType.js": "9592bef505ab15706a1518c05f9b702ec04dbf0bcce31bf752a84f5394ba47f5",
+    "LICENSE": "553d4d20029a24e315b428a1a54a9e109eaa340f2e958a4f50a92362c2c4070b"
+  },
+  "externalPackageIdentity": false,
+  "clearance": "Specific parser backport; no comprehensive first-party or vendored-source advisory clearance"
+}

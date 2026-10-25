@@ -54,7 +54,6 @@
     "depd": "^1.1.2",
     "immutable": "^3.8.4",
     "lodash": "^4.18.1",
-    "negotiator": "git+https://github.com/ethanresnick/negotiator.git#e2fe4abc56271b9851132f3e508e7323415c8aea",
     "pluralize": "0.0.11",
     "pug": "^3.0.3",
     "qs": "^6.5.3",
@@ -113,7 +112,7 @@
     "test:unit": "NODE_ENV=testing mocha --require ts-node/register --extension ts --recursive test/unit/ --full-trace --check-leaks",
     "test:tooling": "node --test test/tooling-security.cjs test/lint-compatibility.cjs test/body-parser-security.cjs",
     "test:debug": "npm run test -- --inspect-brk",
-    "build:lintfree": "npm run clean && cpr templates build/templates && echo Using TypeScript && tsc --version && tsc --pretty",
+    "build:lintfree": "npm run clean && cpr templates build/templates && cpr vendor build/vendor && echo Using TypeScript && tsc --version && tsc --pretty",
     "build": "npm run lint && npm run build:lintfree",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test",
@@ -121,7 +120,9 @@
     "cover:view": "npm run cover && open coverage/index.html",
     "watch": "npm run build -- --watch",
     "watch:lintfree": "npm run build:lintfree -- --watch",
-    "watch:test": "npm run test -- --watch"
+    "watch:test": "npm run test -- --watch",
+    "test:vendor": "node --test --test-reporter=tap test/negotiator-security.cjs && mocha --reporter dot --check-leaks test/vendor-negotiator/",
+    "test:package": "node scripts/verify-packed-consumer.cjs"
   },
   "bugs": {
     "url": "https://github.com/ethanresnick/json-api/issues"
@@ -138,5 +139,12 @@
   ],
   "engines": {
     "node": ">=18.20.8"
-  }
+  },
+  "files": [
+    "build",
+    "src",
+    "typings",
+    "templates",
+    "vendor"
+  ]
 }

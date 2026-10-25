@@ -1,7 +1,7 @@
 import _ = require("lodash");
 import path = require("path");
 import pug = require("pug");
-import Negotiator = require("negotiator");
+import Negotiator = require("../../vendor/negotiator");
 import dasherize = require("dasherize");
 
 import ResourceTypeRegistry, { ResourceTypeDescription, ResourceTypeInfo } from "../ResourceTypeRegistry";

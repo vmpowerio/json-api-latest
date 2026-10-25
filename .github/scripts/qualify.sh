@@ -12,6 +12,7 @@ export npm_config_audit=false npm_config_fund=false npm_config_ignore_scripts=tr
 unset NODE_OPTIONS NODE_PATH
 
 timeout --kill-after=5s 180s npm run build
+timeout --kill-after=5s 120s npm run test:vendor
 if [ "$1" = full ]; then
   timeout --kill-after=5s 120s npm run test:tooling
 else
