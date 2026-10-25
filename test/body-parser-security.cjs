@@ -7,8 +7,9 @@ const { PassThrough } = require('node:stream');
 const { gzipSync, deflateSync } = require('node:zlib');
 
 if (process.argv[2] === 'probe') {
+  assert.equal(process.argv.length, 4, 'Probe accepts only the fixed installed dependency');
   const scenario = process.argv[3];
-  const bodyParser = require(process.argv[4] || 'body-parser');
+  const bodyParser = require('body-parser');
   const express = require('express');
   const socket = new PassThrough();
   const req = new IncomingMessage(socket);
@@ -55,7 +56,7 @@ if (process.argv[2] === 'probe') {
     if (trailing) setImmediate(() => { req.push(tail); req.push(null); });
     setTimeout(() => {
       clearTimeout(timeout);
-      console.log(JSON.stringify({ scenario, version: require((process.argv[4] || 'body-parser') + '/package.json').version,
+      console.log(JSON.stringify({ scenario, version: require('body-parser/package.json').version,
         status: error ? error.status : 200, type: error && error.type,
         body: Buffer.isBuffer(req.body) ? req.body.toString() : req.body,
         callbacks, ended, consumed, expectedBytes: payload.length + (trailing ? tail.length : 0) }));
