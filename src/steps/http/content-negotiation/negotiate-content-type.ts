@@ -1,4 +1,4 @@
-import Negotiator = require("negotiator");
+import Negotiator = require("../../../../vendor/negotiator");
 import * as Errors from "../../../util/errors";
 import { objectIsEmpty } from "../../../util/misc";
 

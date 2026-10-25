@@ -10,16 +10,31 @@ the emitted public entry, fixture installation, and the complete existing unit
 and integration selection. Node 18.20.8 runs lint/build, source and compiled
 units, the public entry, body-parser and lint controls. Dependencies are installed
 under the Node 24 distribution's npm 11.19.1 before switching the compatibility
-job to Node 18. No runtime, package manifest, or dependency lock changes are made.
+job to Node 18. The jobs do not rewrite runtime source, manifests or the lock.
+Both runtimes also run the original 250 internal Negotiator tests, bounded parser
+regressions, and an actual offline packed-package consumer installation.
 
 Installation uses an empty temporary credential route, disabled install scripts
 and audit requests, the public npm registry, and a seven-day release-age guard.
 The existing exact body-parser 1.20.9 exception is bounded by the frozen source
 hashes, exact version/integrity, and all ten installed tarball file hashes.
-The unchanged public Negotiator commit uses an invocation-only HTTPS rewrite;
-no SSH keys, global configuration, private grants, or private registries are used.
+All 532 external lock nodes use the public registry. The custom Negotiator runtime
+is now internal source under `vendor/negotiator`, with MIT/provenance retained and
+the exact upstream language-parser fix. External Git dependencies and their
+HTTPS rewrite exception are removed. No SSH keys, global configuration, private
+grants or private registries are used.
 Dependency changes require a renewed source/age review and updated qualification
 hashes. A successful workflow is not a fresh vulnerability scan.
+
+The install retains only its public npm cache in the disposable job's
+`RUNNER_TEMP`; no cache is uploaded or shared between jobs. The package test uses
+that cache offline, with lifecycle scripts disabled, and rejects dependency
+versions outside the reviewed lock. It packs the real library using its existing
+prepare build, installs it with lifecycle scripts disabled in a
+temporary downstream project, verifies source/compiled internal runtime bytes,
+exercises the public entry and real media/language behavior, and compiles a
+declaration consumer. Checkout fallback is rejected. Its isolated consumer is
+removed on completion; GitHub removes the job cache with the disposable job.
 
 The integration job uses only its disposable official Mongo 7.0.45 Jammy service,
 pinned by digest and mapped to loopback port 27017. Existing tests hard-code

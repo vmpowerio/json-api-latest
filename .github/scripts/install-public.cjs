@@ -8,10 +8,9 @@ const path = require('node:path');
 const os = require('node:os');
 const { createHash } = require('node:crypto');
 const { spawnSync } = require('node:child_process');
-const lockHash = '2b3cb29398b9d148aeb8dd321e6436629c16175b42436a46fe59a71e9850825d';
-const manifestHash = 'f77b805a5e292732f617c3814a24f4205ced9b326a5740e039acda6085737f34';
+const lockHash = 'fed4df803f8eddce823bca0310a8227166272531baccd41d850227aede1f4d03';
+const manifestHash = 'ad05ea374fd514879a01d79153b146aadc40dc5063224057e74bf4fe1eec95d1';
 const approvedIntegrity = 'sha512-FISIQxV5u91Y9gvuFq3q/tA/qTqLJn3AhRcEvyozyhJTh5OBFFtv827AdHU7Rbyct4r+Ba1/99oFa1Y3yuFsdw==';
-const gitSource = 'git+ssh://git@github.com/ethanresnick/negotiator.git#e2fe4abc56271b9851132f3e508e7323415c8aea';
 const patchFiles = {
   'LICENSE': [1172, '23d466b1b134b415b66fa50c6526b4cf3e7b9258554da88d3abb371721e7ce68'],
   'index.js': [2681, '9c6c900e7e85fb599c62d9b9e4dfd2ea2f61d119dce5ed69ac3a8da828819241'],
@@ -28,7 +27,6 @@ const sha = data => createHash('sha256').update(data).digest('hex');
 
 function verifyLock(lock) {
   let publicPackages = 0;
-  let gitPackages = 0;
   const parserPaths = [];
   for (const [name, value] of Object.entries(lock.packages)) {
     if (!name) continue;
@@ -37,8 +35,7 @@ function verifyLock(lock) {
       assert.equal(value.integrity, approvedIntegrity);
       parserPaths.push(name);
     }
-    if (value.resolved === gitSource && name === 'node_modules/negotiator') gitPackages++;
-    else {
+    {
       const url = new URL(value.resolved);
       assert.equal(url.origin, 'https://registry.npmjs.org');
       assert.equal(url.username + url.password + url.search + url.hash, '');
@@ -46,7 +43,6 @@ function verifyLock(lock) {
     }
   }
   assert.equal(publicPackages, 532);
-  assert.equal(gitPackages, 1);
   assert.deepEqual(parserPaths, ['node_modules/body-parser']);
 }
 
@@ -108,12 +104,11 @@ function install() {
       PATH: process.env.PATH, HOME: temporary,
       npm_config_userconfig: path.join(temporary, 'npmrc'),
       npm_config_globalconfig: path.join(temporary, 'global-npmrc'),
-      npm_config_cache: path.join(temporary, 'cache'),
-      GIT_CONFIG_NOSYSTEM: '1', GIT_TERMINAL_PROMPT: '0', GIT_ALLOW_PROTOCOL: 'https',
-      // The unchanged public Git lock source does not require an SSH credential.
-      GIT_CONFIG_COUNT: '1',
-      GIT_CONFIG_KEY_0: 'url.https://github.com/ethanresnick/negotiator.git.insteadOf',
-      GIT_CONFIG_VALUE_0: 'ssh://git@github.com/ethanresnick/negotiator.git'
+      // Job-local public cache is reused only by the offline packed-consumer test.
+      // GitHub removes RUNNER_TEMP with the disposable job; nothing is uploaded.
+      npm_config_cache: process.env.RUNNER_TEMP
+        ? path.join(process.env.RUNNER_TEMP, 'json-api-public-cache')
+        : path.join(temporary, 'cache')
     };
     const child = spawnSync(process.execPath, [path.join(npmRoot, 'bin/npm-cli.js'), 'ci'],
       { cwd: root, env, stdio: 'inherit', timeout: 240000 });

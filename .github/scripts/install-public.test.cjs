@@ -20,8 +20,8 @@ test('rejects private or authenticated registry destinations before npm runs', (
     assert.throws(() => verifyLock(lock));
   }
 });
-test('rejects changed Git source identity before npm runs', () => {
-  const lock = fresh(); lock.packages['node_modules/negotiator'].resolved += '0';
+test('rejects every external Git source before npm runs', () => {
+  const lock = fresh(); lock.packages['node_modules/body-parser'].resolved = 'git+https://github.com/ethanresnick/negotiator.git#e2fe4abc56271b9851132f3e508e7323415c8aea';
   assert.throws(() => verifyLock(lock));
 });
 
